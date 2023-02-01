@@ -1,0 +1,1 @@
+#genericToast{animation:slideIn .5s ease}@keyframes slideIn{0%{transform:translateY(200px)}to{transform:translateY(0)}}
