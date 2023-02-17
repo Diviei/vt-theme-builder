@@ -190,7 +190,7 @@ export default defineComponent({
   },
   mounted() {
     this.themeName = params.get("theme-name") || "";
-    this.themeType = params.get("theme-type") || "";
+    this.themeType = (params.get("theme-type") || "") as "light" | "dark";
   },
   methods: {
     downloadScript() {
@@ -217,12 +217,16 @@ export default defineComponent({
           (a, color) => ({ ...a, [color.name]: color.value.replace("#", "") }),
           {}
         );
-      coloursObject["theme-name"] = this.themeName;
-      coloursObject["theme-type"] = this.themeType;
+
       window.history.pushState(
         "",
         "",
-        "?" + new URLSearchParams(coloursObject).toString()
+        "?" +
+          new URLSearchParams({
+            ...coloursObject,
+            ...{ "theme-name": this.themeName },
+            ...{ "theme-type": this.themeType },
+          }).toString()
       );
     },
     getTwitterMsg() {
