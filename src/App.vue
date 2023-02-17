@@ -12,6 +12,7 @@
                 v-model="themeName"
                 placeholder="Enter your theme name"
                 required
+                @change="updateUrl"
               />
             </div>
           </div>
@@ -23,6 +24,7 @@
                   type="radio"
                   value="light"
                   v-model="themeType"
+                  @change="updateUrl"
                 />
 
                 Light theme
@@ -35,6 +37,7 @@
                   type="radio"
                   value="dark"
                   v-model="themeType"
+                  @change="updateUrl"
                 />
 
                 Dark theme
@@ -83,10 +86,18 @@
         </div>
 
         <div class="row">
-          <div class="col-12">
+          <div class="col-12 hstack gap-2">
             <button type="submit" class="btn btn-outline-primary">
               Copy Tampermonkey script
             </button>
+
+            <a
+              class="btn btn-outline-info"
+              :href="'https://twitter.com/intent/tweet?text=' + getTwitterMsg()"
+              target="_blank"
+            >
+              Share your theme
+            </a>
           </div>
         </div>
       </form>
@@ -125,6 +136,18 @@ import homeMock from "./assets/homemock.svg?raw";
 import fileMock from "./assets/filemock.svg?raw";
 
 const prefix = "--vt-";
+let uri = window.location.search.substring(1);
+let params = new URLSearchParams(uri);
+
+function colorMap(color: { name: string; value: string }) {
+  if (params.get(color.name)) {
+    return {
+      name: color.name,
+      value: "#" + params.get(color.name),
+    };
+  }
+  return color;
+}
 
 const mainColors = [
   { name: "body-bg", value: "#ffffff" },
@@ -136,7 +159,7 @@ const mainColors = [
   { name: "warning", value: "#fc9929" },
   { name: "success", value: "#22b573" },
   { name: "disabled-color", value: "#c7ccd6" },
-];
+].map(colorMap);
 const secondaryColors = [
   { name: "secondary-bg", value: "#f9fafb" },
   { name: "secondary-color", value: "#363c49" },
@@ -150,7 +173,7 @@ const secondaryColors = [
   { name: "warning-color", value: "#fc9929" },
   { name: "success-bg", value: "#22b573" },
   { name: "success-color", value: "#22b573" },
-];
+].map(colorMap);
 
 export default defineComponent({
   data() {
@@ -166,8 +189,8 @@ export default defineComponent({
     };
   },
   mounted() {
-    // const genericToast = document.querySelector("#genericToast");
-    // this.updateUrl();
+    this.themeName = params.get("theme-name") || "";
+    this.themeType = params.get("theme-type") || "";
   },
   methods: {
     downloadScript() {
@@ -194,11 +217,17 @@ export default defineComponent({
           (a, color) => ({ ...a, [color.name]: color.value.replace("#", "") }),
           {}
         );
+      coloursObject["theme-name"] = this.themeName;
+      coloursObject["theme-type"] = this.themeType;
       window.history.pushState(
         "",
         "",
         "?" + new URLSearchParams(coloursObject).toString()
       );
+    },
+    getTwitterMsg() {
+      const msg = `Custom @virustotal theme ${document.location.href}`;
+      return encodeURI(msg);
     },
   },
   computed: {
