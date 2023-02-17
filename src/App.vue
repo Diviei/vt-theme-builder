@@ -56,6 +56,7 @@
                 type="color"
                 class="form-control form-control-color"
                 v-model="color.value"
+                @change="updateUrl"
               />
             </div>
           </div>
@@ -75,6 +76,7 @@
                 type="color"
                 class="form-control form-control-color"
                 v-model="color.value"
+                @change="updateUrl"
               />
             </div>
           </div>
@@ -164,7 +166,8 @@ export default defineComponent({
     };
   },
   mounted() {
-    const genericToast = document.querySelector("#genericToast");
+    // const genericToast = document.querySelector("#genericToast");
+    // this.updateUrl();
   },
   methods: {
     downloadScript() {
@@ -183,6 +186,19 @@ export default defineComponent({
       setTimeout(() => {
         this.toastShown = false;
       }, 5000);
+    },
+    updateUrl() {
+      let coloursObject = this.mainColors
+        .concat(this.secondaryColors)
+        .reduce(
+          (a, color) => ({ ...a, [color.name]: color.value.replace("#", "") }),
+          {}
+        );
+      window.history.pushState(
+        "",
+        "",
+        "?" + new URLSearchParams(coloursObject).toString()
+      );
     },
   },
   computed: {
