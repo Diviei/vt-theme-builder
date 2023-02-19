@@ -1,8 +1,29 @@
 <template>
-  <div class="container py-5" :style="cssProps">
-    <div class="row">
+  <div class="container" :style="cssProps">
+    <header class="hstack my-4">
+      <h1>VirusTotal Theme Builder</h1>
+
+      <div class="links hstack gap-3 ms-auto fs-4">
+        <!-- <a role="button" data-bs-toggle="modal" data-bs-target="#howItWorks">
+          <i class="bi-question-circle"></i>
+        </a> -->
+        <a
+          href="https://github.com/Diviei/vt-theme-builder"
+          rel="noopener"
+          target="_blank"
+          alt="Project's Github repo"
+          aria-label="Project's Github repo"
+        >
+          <i class="bi-github"></i>
+        </a>
+      </div>
+    </header>
+
+    <prebuiltThemes></prebuiltThemes>
+
+    <div class="row mt-4">
       <form class="col" @submit.prevent="downloadScript">
-        <h1>Theme properties</h1>
+        <h2>Theme properties</h2>
         <div class="row mb-5">
           <div class="col-12">
             <div class="mb-3">
@@ -45,7 +66,7 @@
             </div>
           </div>
         </div>
-        <h1>Main colors</h1>
+        <h2>Main colors</h2>
         <div class="row gy-4 mb-5">
           <div
             class="col-3 text-nowrap"
@@ -54,7 +75,12 @@
           >
             <div class="form-label">{{ color.name }}</div>
             <div class="hstack gap-2">
-              <input type="text" class="form-control" v-model="color.value" />
+              <input
+                type="text"
+                class="form-control"
+                v-model="color.value"
+                @change="updateUrl"
+              />
               <input
                 type="color"
                 class="form-control form-control-color"
@@ -65,7 +91,7 @@
           </div>
         </div>
 
-        <h1>Secondary colors</h1>
+        <h2>Secondary colors</h2>
         <div class="row gy-4 mb-5">
           <div
             class="col-3 text-nowrap"
@@ -74,7 +100,12 @@
           >
             <div class="form-label">{{ color.name }}</div>
             <div class="hstack gap-2">
-              <input type="text" class="form-control" v-model="color.value" />
+              <input
+                type="text"
+                class="form-control"
+                v-model="color.value"
+                @change="updateUrl"
+              />
               <input
                 type="color"
                 class="form-control form-control-color"
@@ -93,23 +124,24 @@
 
             <a
               class="btn btn-outline-info"
-              :href="'https://twitter.com/intent/tweet?text=' + getTwitterMsg()"
+              :href="getTwitterLink()"
               target="_blank"
             >
-              Share your theme
+              <i class="bi-twitter"></i>
+              Share
             </a>
           </div>
         </div>
       </form>
 
       <div class="col-5">
-        <h1>Preview</h1>
+        <h2>Preview</h2>
         <div class="row gy-4 position-sticky top-0">
           <div class="col-12">
-            <div class="border p-3" v-html="homeMock"></div>
+            <div class="img-thumbnail p-3" v-html="homeMock"></div>
           </div>
           <div class="col-12">
-            <div class="border p-3" v-html="fileMock"></div>
+            <div class="img-thumbnail p-3" v-html="fileMock"></div>
           </div>
         </div>
       </div>
@@ -125,15 +157,19 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal -->
+  <helpModal></helpModal>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-
 import { generateScriptCode } from "./generate-script";
-
 import homeMock from "./assets/homemock.svg?raw";
 import fileMock from "./assets/filemock.svg?raw";
+import * as bootstrap from "bootstrap";
+import helpModal from "./helpModal.vue";
+import prebuiltThemes from "./prebuiltThemes.vue";
 
 const prefix = "--vt-";
 let uri = window.location.search.substring(1);
@@ -176,6 +212,10 @@ const secondaryColors = [
 ].map(colorMap);
 
 export default defineComponent({
+  components: {
+    helpModal,
+    prebuiltThemes,
+  },
   data() {
     return {
       themeName: "",
@@ -191,6 +231,10 @@ export default defineComponent({
   mounted() {
     this.themeName = params.get("theme-name") || "";
     this.themeType = (params.get("theme-type") || "") as "light" | "dark";
+
+    document
+      .querySelectorAll('[data-bs-toggle="tooltip"]')
+      .forEach((tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl));
   },
   methods: {
     downloadScript() {
@@ -229,9 +273,10 @@ export default defineComponent({
           }).toString()
       );
     },
-    getTwitterMsg() {
-      const msg = `Custom @virustotal theme ${document.location.href}`;
-      return encodeURI(msg);
+    getTwitterLink() {
+      return `https://twitter.com/intent/tweet?text=Custom @virustotal theme&url=${encodeURIComponent(
+        document.location.href
+      )}`;
     },
   },
   computed: {
